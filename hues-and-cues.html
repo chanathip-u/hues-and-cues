@@ -1,0 +1,637 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Hues &amp; Cues — เล่นออนไลน์</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&family=Noto+Sans+Thai:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#08080b; --panel:#131319; --panel2:#1a1a22; --line:#26262f;
+  --ink:#ECECF1; --mut:#8a8a97; --dim:#5a5a66;
+  --good:#4ade80; --warn:#fbbf24; --accent:#d4d4dc;
+  --mono:'JetBrains Mono',ui-monospace,Menlo,monospace;
+  --ui:'Space Grotesk','Noto Sans Thai',system-ui,sans-serif;
+  --th:'Noto Sans Thai','Space Grotesk',system-ui,sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{
+  background:
+    radial-gradient(900px 600px at 50% -10%, #17131f 0%, transparent 60%),
+    var(--bg);
+  color:var(--ink); font-family:var(--th);
+  -webkit-font-smoothing:antialiased; line-height:1.5;
+  padding:16px; overflow-x:hidden;
+}
+button{font-family:inherit;cursor:pointer}
+.mono{font-family:var(--mono);font-variant-numeric:tabular-nums}
+
+/* ---------- wordmark ---------- */
+.brand{display:flex;align-items:center;gap:12px;justify-content:center;margin-bottom:4px}
+.brand .swatches{display:flex;gap:3px}
+.brand .swatches i{width:10px;height:22px;border-radius:2px;display:block}
+.brand h1{
+  font-family:var(--ui);font-weight:700;letter-spacing:.28em;
+  text-transform:uppercase;font-size:clamp(20px,4.5vw,30px);
+  padding-left:.28em;
+}
+.brand .amp{color:var(--dim);font-weight:400}
+.tagline{text-align:center;color:var(--mut);font-family:var(--mono);
+  font-size:11px;letter-spacing:.25em;text-transform:uppercase;margin-bottom:22px}
+
+.wrap{max-width:1200px;margin:0 auto}
+
+/* ---------- setup ---------- */
+.card{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:22px}
+.setup{max-width:520px;margin:0 auto}
+.setup h2{font-family:var(--ui);font-size:15px;letter-spacing:.02em;margin-bottom:4px}
+.hint{color:var(--mut);font-size:13px;margin-bottom:16px}
+.prow{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+.pdot{width:26px;height:26px;border-radius:50%;flex:none;border:2px solid #fff2;
+  box-shadow:0 0 0 1px #0006, inset 0 2px 4px #fff4}
+.prow input{
+  flex:1;background:var(--panel2);border:1px solid var(--line);color:var(--ink);
+  border-radius:9px;padding:9px 12px;font-family:var(--th);font-size:14px;outline:none}
+.prow input:focus{border-color:#4a4a5a}
+.prow .rm{background:none;border:none;color:var(--dim);font-size:20px;padding:0 6px;line-height:1}
+.prow .rm:hover{color:var(--warn)}
+.btn{
+  background:var(--ink);color:#0b0b10;border:none;border-radius:10px;
+  padding:11px 18px;font-family:var(--ui);font-weight:600;font-size:14px;
+  transition:transform .08s, filter .15s}
+.btn:hover{filter:brightness(1.08)} .btn:active{transform:translateY(1px)}
+.btn.ghost{background:transparent;color:var(--ink);border:1px solid var(--line)}
+.btn.ghost:hover{border-color:#4a4a5a;background:var(--panel2)}
+.btn.wide{width:100%;justify-content:center;text-align:center}
+.btn[disabled]{opacity:.4;cursor:not-allowed}
+.rounds{display:flex;gap:8px;margin:6px 0 18px}
+.rounds button{flex:1;background:var(--panel2);border:1px solid var(--line);color:var(--mut);
+  border-radius:9px;padding:10px;font-family:var(--th);font-size:13px}
+.rounds button.on{background:#fff;color:#0b0b10;border-color:#fff;font-weight:600}
+.addp{color:var(--mut);background:none;border:1px dashed var(--line);border-radius:9px;
+  padding:9px;width:100%;font-family:var(--th);font-size:13px;margin:4px 0 18px}
+.addp:hover{color:var(--ink);border-color:#4a4a5a}
+
+/* ---------- game layout ---------- */
+.game{display:none}
+.game.on{display:block}
+.hdr{display:flex;justify-content:space-between;align-items:center;
+  flex-wrap:wrap;gap:10px;margin-bottom:14px}
+.turnpill{font-family:var(--mono);font-size:11px;letter-spacing:.15em;text-transform:uppercase;
+  color:var(--mut);border:1px solid var(--line);border-radius:20px;padding:6px 12px}
+.layout{display:grid;grid-template-columns:1fr 300px;gap:18px;align-items:start}
+@media(max-width:860px){.layout{grid-template-columns:1fr}}
+
+/* ---------- board ---------- */
+.boardwrap{background:#000;border:1px solid var(--line);border-radius:14px;
+  padding:10px 8px;overflow-x:auto;-webkit-overflow-scrolling:touch}
+.board{--cell:26px; display:grid;
+  grid-template-columns:16px repeat(30,var(--cell));
+  grid-template-rows:14px repeat(16,var(--cell)) 14px;
+  gap:2px; margin:0 auto; width:max-content}
+@media(max-width:600px){.board{--cell:19px}}
+.lbl{color:var(--dim);font-family:var(--mono);font-size:9px;
+  display:flex;align-items:center;justify-content:center;user-select:none}
+.cell{position:relative;border-radius:2px;transition:transform .1s}
+.cell.pick{cursor:pointer}
+.cell.pick:hover{transform:scale(1.28);z-index:6;box-shadow:0 0 0 2px #fff,0 4px 12px #000a}
+.cell.occ{cursor:not-allowed}
+.pawn{position:absolute;inset:14%;border-radius:50%;
+  border:1.5px solid #0009; box-shadow:0 0 0 1.5px #fffb, 0 1px 3px #000a;
+  display:flex;align-items:center;justify-content:center;
+  font-family:var(--mono);font-size:9px;font-weight:700;color:#000c;z-index:4}
+.pawn.p2{inset:26%}
+/* scoring frame */
+.cell.z1{box-shadow:inset 0 0 0 1px #ffffff55}
+.cell.z2{box-shadow:inset 0 0 0 2px #ffffffcc}
+.cell.z0::after{content:"";position:absolute;inset:0;border-radius:2px;
+  box-shadow:inset 0 0 0 3px #fff,0 0 14px 3px #fff9; animation:pop .35s ease}
+.cell.z0 .star{position:absolute;inset:0;display:flex;align-items:center;
+  justify-content:center;color:#000;font-size:calc(var(--cell)*.6);font-weight:700;z-index:3}
+@keyframes pop{from{transform:scale(.4);opacity:0}to{transform:scale(1);opacity:1}}
+
+/* ---------- side panel ---------- */
+.side{display:flex;flex-direction:column;gap:14px}
+.scores{padding:14px 16px}
+.scores h3, .stage h3{font-family:var(--mono);font-size:10px;letter-spacing:.2em;
+  text-transform:uppercase;color:var(--mut);margin-bottom:10px}
+.srow{display:flex;align-items:center;gap:9px;padding:6px 0;border-bottom:1px solid #ffffff08}
+.srow:last-child{border:none}
+.srow .pdot{width:16px;height:16px}
+.srow .nm{flex:1;font-size:14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.srow.cue .nm::after{content:"ใบ้";font-family:var(--mono);font-size:9px;color:#0b0b10;
+  background:var(--warn);border-radius:4px;padding:1px 5px;margin-left:7px;vertical-align:middle}
+.srow .pts{font-family:var(--mono);font-weight:700;font-size:16px}
+.srow .delta{font-family:var(--mono);font-size:11px;color:var(--good);min-width:26px;text-align:right}
+
+.stage{padding:16px}
+.step{font-family:var(--mono);font-size:10px;letter-spacing:.18em;color:var(--dim);
+  text-transform:uppercase;margin-bottom:8px}
+.big{font-family:var(--ui);font-weight:600;font-size:17px;line-height:1.35;margin-bottom:6px}
+.sub{color:var(--mut);font-size:13px;margin-bottom:14px}
+.who{display:inline-flex;align-items:center;gap:7px;font-weight:600}
+.who .pdot{width:15px;height:15px}
+.clueline{font-family:var(--mono);background:#0d0d12;border:1px solid var(--line);
+  border-radius:9px;padding:9px 12px;font-size:13px;margin:8px 0;color:var(--ink);
+  display:flex;gap:8px}
+.clueline b{color:var(--warn);font-weight:700}
+input.clue{width:100%;background:var(--panel2);border:1px solid var(--line);color:var(--ink);
+  border-radius:9px;padding:10px 12px;font-family:var(--th);font-size:14px;outline:none;margin-bottom:10px}
+input.clue:focus{border-color:#4a4a5a}
+.bans{display:flex;gap:8px;flex-wrap:wrap}
+.bans .btn{flex:1;min-width:110px}
+.note{color:var(--dim);font-size:11px;margin-top:10px;line-height:1.5}
+.note b{color:var(--warn)}
+
+/* card modal */
+.overlay{position:fixed;inset:0;background:#000c;backdrop-filter:blur(3px);
+  display:none;align-items:center;justify-content:center;padding:20px;z-index:50}
+.overlay.on{display:flex}
+.cardbox{background:#0e0e13;border:1px solid var(--line);border-radius:18px;
+  padding:22px;max-width:340px;width:100%;text-align:center}
+.cardbox .step{margin-bottom:14px}
+.cardgrid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:8px}
+.swatch{aspect-ratio:1;border-radius:12px;position:relative;cursor:pointer;
+  border:2px solid #ffffff14;transition:transform .1s}
+.swatch:hover{transform:scale(1.04);border-color:#fff}
+.swatch span{position:absolute;left:8px;bottom:6px;font-family:var(--mono);
+  font-weight:700;font-size:13px;color:#000b;text-shadow:0 1px 2px #fff8}
+.cardbox .note{text-align:left}
+.peek{margin-top:14px}
+
+/* reveal summary */
+.result{padding:16px}
+.result .coord{font-family:var(--mono);font-size:26px;font-weight:700;letter-spacing:.05em}
+.rrow{display:flex;justify-content:space-between;align-items:center;
+  padding:7px 0;border-bottom:1px solid #ffffff08;font-size:14px}
+.rrow:last-child{border:none}
+.rrow .pdot{width:15px;height:15px}
+.rrow .l{display:flex;align-items:center;gap:8px;flex:1}
+.rrow .g{font-family:var(--mono);color:var(--good);font-weight:700}
+
+/* winner */
+.winner{text-align:center;padding:30px 20px}
+.winner .crown{font-size:40px}
+.winner .wname{font-family:var(--ui);font-size:26px;font-weight:700;margin:6px 0}
+.podium{display:flex;flex-direction:column;gap:8px;max-width:340px;margin:18px auto 0;text-align:left}
+
+.footer{text-align:center;color:var(--dim);font-size:11px;margin-top:26px;
+  font-family:var(--mono);letter-spacing:.05em}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="brand">
+    <div class="swatches">
+      <i style="background:#e23b3b"></i><i style="background:#f5a623"></i>
+      <i style="background:#f7e017"></i><i style="background:#37c26b"></i>
+      <i style="background:#2f9be0"></i><i style="background:#8a4fd0"></i>
+    </div>
+    <h1>Hues <span class="amp">&amp;</span> Cues</h1>
+  </div>
+  <div class="tagline">480 hues · pass &amp; play</div>
+
+  <!-- ============ SETUP ============ -->
+  <div id="setup" class="setup card">
+    <h2>ตั้งค่าผู้เล่น</h2>
+    <p class="hint">เพิ่มผู้เล่น 2–10 คน เล่นบนจอเดียว ผลัดกันเป็นคนใบ้</p>
+    <div id="players"></div>
+    <button class="addp" id="addp">+ เพิ่มผู้เล่น</button>
+    <h2>จำนวนรอบที่แต่ละคนได้เป็นคนใบ้</h2>
+    <p class="hint">แนะนำ 2 รอบเมื่อผู้เล่นน้อย</p>
+    <div class="rounds" id="rounds">
+      <button data-r="1">1 รอบ</button>
+      <button data-r="2" class="on">2 รอบ</button>
+    </div>
+    <button class="btn wide" id="start">เริ่มเกม</button>
+    <p class="note" style="margin-top:16px">
+      กติกาย่อ: คนใบ้จั่วการ์ด เลือก 1 สีเป็นความลับ แล้วพูดคำใบ้ (ห้ามบอกชื่อสี ตัวเลข หรือชี้ของในห้อง)
+      คนอื่นวางหมากทายบนกระดาน 2 ครั้ง แล้วเฉลย นับแต้มจากกรอบ 3×3 และ 5×5
+    </p>
+  </div>
+
+  <!-- ============ GAME ============ -->
+  <div id="game" class="game">
+    <div class="hdr">
+      <div class="turnpill mono" id="turnpill">เทิร์น 1</div>
+      <button class="btn ghost" id="quit" style="padding:7px 14px;font-size:12px">เริ่มเกมใหม่</button>
+    </div>
+    <div class="layout">
+      <div>
+        <div class="boardwrap"><div class="board" id="board"></div></div>
+      </div>
+      <div class="side">
+        <div class="card stage" id="stage"><!-- phase controls injected --></div>
+        <div class="card scores">
+          <h3>คะแนน</h3>
+          <div id="scoreboard"></div>
+        </div>
+      </div>
+    </div>
+    <p class="footer">Hues &amp; Cues • ดัดแปลงเป็นเวอร์ชันเว็บสำหรับเล่นด้วยกัน</p>
+  </div>
+
+</div>
+
+<!-- card overlay -->
+<div class="overlay" id="overlay">
+  <div class="cardbox" id="cardbox"></div>
+</div>
+
+<script>
+/* ---------------- color engine (480 hues, color-wheel model) ----------------
+   Modelled on the real Hues & Cues board: a colour wheel centred slightly above
+   the middle. Hue = angle around the centre, saturation grows toward the edges
+   (pale centre), lightness is high at the centre and darkened toward the top. */
+const COLS=30, ROWS=16, CX=14.5, CY=6.5;
+function cellHSLraw(c,r){                 // -> {h,s,l}
+  const nx=(c-CX)/CX;
+  const ny=(r-CY)/(r<CY?CY:(ROWS-1-CY));  // -> [-1,1]
+  const ang=Math.atan2(ny,nx)*180/Math.PI;
+  let h=(240-ang)%360; if(h<0)h+=360;
+  const rad=Math.min(1,Math.hypot(nx, ny*1.05));
+  let s=5+88*Math.pow(rad,1.4);
+  let l=50+42*(1-rad)+15*ny;              // top (ny<0) darker, centre lighter
+  if(l<45) s*=0.72+0.28*(l/45);           // brown-shift the dark corners
+  l=Math.max(4,Math.min(96,l));
+  return {h,s,l};
+}
+function cellHSL(c,r){const {h,s,l}=cellHSLraw(c,r);
+  return `hsl(${h.toFixed(1)},${s.toFixed(1)}%,${l.toFixed(1)}%)`;}
+function hslToRgb(h,s,l){s/=100;l/=100;
+  const k=n=>(n+h/30)%12, a=s*Math.min(l,1-l);
+  const f=n=>l-a*Math.max(-1,Math.min(k(n)-3,9-k(n),1));
+  return [f(0)*255,f(8)*255,f(4)*255];}
+function cellRGB(c,r){const {h,s,l}=cellHSLraw(c,r);return hslToRgb(h,s,l);}
+function rgbDist(a,b){return Math.hypot(a[0]-b[0],a[1]-b[1],a[2]-b[2]);}
+const rowLabel=r=>String.fromCharCode(65+r);        // A..P
+const coordOf=(c,r)=>rowLabel(r)+(c+1);             // e.g. H8
+
+/* ---------------- player palette (pawns) ---------------- */
+const PAWNS=['#e6332a','#2f7de0','#22b455','#f4c81e','#8a4fd0','#f07d1a',
+             '#e84f9c','#f4f4f4','#17c4c4','#7a5a3a'];
+
+/* ---------------- state ---------------- */
+let S=null;
+function newSetup(){
+  return {players:[{name:'',c:0},{name:'',c:1},{name:'',c:2}], roundsPer:2};
+}
+let setup=newSetup();
+
+/* ---------------- SETUP UI ---------------- */
+const playersEl=document.getElementById('players');
+function renderSetup(){
+  playersEl.innerHTML='';
+  setup.players.forEach((p,i)=>{
+    const row=document.createElement('div'); row.className='prow';
+    row.innerHTML=`<span class="pdot" style="background:${PAWNS[p.c]}"></span>
+      <input placeholder="ผู้เล่น ${i+1}" value="${p.name.replace(/"/g,'&quot;')}">
+      ${setup.players.length>2?'<button class="rm" title="ลบ">×</button>':''}`;
+    row.querySelector('input').addEventListener('input',e=>{setup.players[i].name=e.target.value;});
+    const rm=row.querySelector('.rm');
+    if(rm) rm.addEventListener('click',()=>{setup.players.splice(i,1);reassignColors();renderSetup();});
+    playersEl.appendChild(row);
+  });
+  document.getElementById('addp').style.display=setup.players.length>=10?'none':'block';
+}
+function reassignColors(){setup.players.forEach((p,i)=>p.c=i);}
+document.getElementById('addp').addEventListener('click',()=>{
+  if(setup.players.length<10){setup.players.push({name:'',c:setup.players.length});renderSetup();}
+});
+document.querySelectorAll('#rounds button').forEach(b=>b.addEventListener('click',()=>{
+  document.querySelectorAll('#rounds button').forEach(x=>x.classList.remove('on'));
+  b.classList.add('on'); setup.roundsPer=+b.dataset.r;
+}));
+document.getElementById('start').addEventListener('click',startGame);
+renderSetup();
+
+/* ---------------- start game ---------------- */
+function startGame(){
+  const players=setup.players
+    .map((p,i)=>({name:(p.name.trim()||`ผู้เล่น ${i+1}`),color:PAWNS[p.c]}))
+    .filter(()=>true);
+  if(players.length<2){alert('ต้องมีผู้เล่นอย่างน้อย 2 คน');return;}
+  S={
+    players, score:players.map(()=>0),
+    cueIdx:0, turn:1, totalTurns:players.length*setup.roundsPer,
+    phase:null, secret:null, card:null,
+    clue1:'', clue2:'',
+    placements:[],           // {p:playerIndex, c, r, pawn:1|2}
+    order:[], ptr:0, pawnRound:1,
+    lastDelta:null,
+  };
+  buildBoard();
+  document.getElementById('setup').style.display='none';
+  document.getElementById('game').classList.add('on');
+  beginTurn();
+}
+document.getElementById('quit').addEventListener('click',()=>{
+  if(confirm('เริ่มเกมใหม่ตั้งแต่ต้น?')){location.reload();}
+});
+
+/* ---------------- board ---------------- */
+const boardEl=document.getElementById('board');
+const cellRef={};
+function buildBoard(){
+  boardEl.innerHTML=''; 
+  const blank=()=>{const d=document.createElement('div');d.className='lbl';return d;};
+  boardEl.appendChild(blank());                                  // corner
+  for(let c=0;c<COLS;c++){const d=document.createElement('div');d.className='lbl';d.textContent=c+1;boardEl.appendChild(d);}
+  for(let r=0;r<ROWS;r++){
+    const rl=document.createElement('div');rl.className='lbl';rl.textContent=rowLabel(r);boardEl.appendChild(rl);
+    for(let c=0;c<COLS;c++){
+      const cell=document.createElement('div');cell.className='cell';
+      cell.style.background=cellHSL(c,r);
+      cell.dataset.c=c;cell.dataset.r=r;
+      cell.addEventListener('click',()=>onCell(c,r));
+      cellRef[c+'_'+r]=cell; boardEl.appendChild(cell);
+    }
+  }
+  boardEl.appendChild(blank());
+  for(let c=0;c<COLS;c++){const d=document.createElement('div');d.className='lbl';d.textContent=c+1;boardEl.appendChild(d);}
+}
+function occupied(c,r){return S.placements.some(p=>p.c===c&&p.r===r);}
+function refreshBoard(){
+  for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){
+    const cell=cellRef[c+'_'+r];
+    cell.className='cell'; cell.innerHTML='';
+    if((S.phase==='guess')&&!occupied(c,r)) cell.classList.add('pick');
+    else if(occupied(c,r)) cell.classList.add('occ');
+  }
+  // pawns
+  S.placements.forEach(pl=>{
+    const cell=cellRef[pl.c+'_'+pl.r];
+    const pw=document.createElement('div');
+    pw.className='pawn'+(pl.pawn===2?' p2':'');
+    pw.style.background=S.players[pl.p].color;
+    pw.textContent=pl.p+1;
+    cell.appendChild(pw);
+  });
+  // reveal frame
+  if(S.phase==='reveal'&&S.secret){
+    const {c:ac,r:ar}=S.secret;
+    for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){
+      const d=Math.max(Math.abs(c-ac),Math.abs(r-ar));
+      const cell=cellRef[c+'_'+r];
+      if(d===0){cell.classList.add('z0');const st=document.createElement('div');st.className='star';st.textContent='★';cell.appendChild(st);}
+      else if(d===1)cell.classList.add('z2');
+      else if(d===2)cell.classList.add('z1');
+    }
+  }
+}
+
+/* ---------------- turn machine ---------------- */
+const stageEl=document.getElementById('stage');
+function cueName(){return S.players[S.cueIdx].name;}
+function whoTag(i){return `<span class="who"><span class="pdot" style="background:${S.players[i].color}"></span>${S.players[i].name}</span>`;}
+
+function beginTurn(){
+  S.secret=null;S.card=null;S.clue1='';S.clue2='';S.placements=[];S.lastDelta=null;
+  S.order=S.players.map((_,i)=>i).filter(i=>i!==S.cueIdx);
+  S.phase='draw';
+  document.getElementById('turnpill').textContent=`เทิร์น ${S.turn} / ${S.totalTurns}`;
+  refreshBoard(); renderStage(); renderScores();
+}
+
+function makeCard(){
+  // pick 4 cells whose colours are clearly distinct to the eye (RGB distance)
+  for(let T=125; T>=70; T-=12){
+    for(let attempt=0; attempt<500; attempt++){
+      const card=[], rgbs=[], set=new Set();
+      let ok=true;
+      for(let i=0;i<4;i++){
+        let placed=false;
+        for(let t=0;t<80;t++){
+          const c=Math.floor(Math.random()*COLS),r=Math.floor(Math.random()*ROWS),k=c+'_'+r;
+          if(set.has(k))continue;
+          const rgb=cellRGB(c,r);
+          if(rgbs.every(o=>rgbDist(o,rgb)>=T)){set.add(k);card.push({c,r});rgbs.push(rgb);placed=true;break;}
+        }
+        if(!placed){ok=false;break;}
+      }
+      if(ok&&card.length===4)return card;
+    }
+  }
+  return null;
+}
+function drawCard(){
+  const card=makeCard();
+  if(card){S.card=card;}                 // keep old card if generation somehow fails
+  S.secret=null;
+  openCardSelect();
+}
+
+/* ---------- overlay: choose secret ---------- */
+const overlay=document.getElementById('overlay');
+const cardbox=document.getElementById('cardbox');
+function openCardSelect(){
+  let sw='';
+  S.card.forEach((sq,i)=>{
+    sw+=`<div class="swatch" data-i="${i}" style="background:${cellHSL(sq.c,sq.r)}"><span>${coordOf(sq.c,sq.r)}</span></div>`;
+  });
+  cardbox.innerHTML=`
+    <div class="step">การ์ดของคนใบ้ · คนอื่นอย่าแอบดู</div>
+    <div class="cardgrid">${sw}</div>
+    <p class="note">แตะสีที่ต้องการให้เป็น <b>คำปริศนา</b> ของรอบนี้</p>`;
+  cardbox.querySelectorAll('.swatch').forEach(el=>{
+    el.onclick=()=>{S.secret={...S.card[+el.dataset.i]};overlay.classList.remove('on');S.phase='clue1';renderStage();};
+  });
+  overlay.classList.add('on');
+}
+/* ---------- overlay: peek at chosen secret again ---------- */
+function peekSecret(){
+  if(!S.secret)return;
+  const {c,r}=S.secret;
+  cardbox.innerHTML=`
+    <div class="step">สีลับของคนใบ้ · คนอื่นอย่ามอง</div>
+    <div style="display:flex;flex-direction:column;align-items:center;gap:10px;margin:6px 0 14px">
+      <div style="width:120px;height:120px;border-radius:16px;border:2px solid #fff3;background:${cellHSL(c,r)}"></div>
+      <div class="coord" style="font-family:var(--mono);font-size:22px;font-weight:700">${coordOf(c,r)}</div>
+    </div>
+    <button class="btn wide" id="closepeek">ปิด</button>`;
+  cardbox.querySelector('#closepeek').onclick=()=>overlay.classList.remove('on');
+  overlay.classList.add('on');
+}
+overlay.addEventListener('click',e=>{ if(e.target===overlay) overlay.classList.remove('on'); });
+
+function onCell(c,r){
+  if(S.phase!=='guess')return;
+  if(occupied(c,r))return;
+  const player=S.order[S.ptr];
+  S.placements.push({p:player,c,r,pawn:S.pawnRound});
+  S.ptr++;
+  refreshBoard();
+  if(S.ptr>=S.order.length){
+    // round of placements finished
+    if(S.pawnRound===1){S.phase='clue2';renderStage();}
+    else{doReveal();}
+  }else{renderStage();}
+}
+
+function startGuess(round){
+  S.pawnRound=round;S.ptr=0;S.phase='guess';
+  refreshBoard();renderStage();
+}
+
+/* ---------------- scoring ---------------- */
+function pawnPoints(pl){
+  const d=Math.max(Math.abs(pl.c-S.secret.c),Math.abs(pl.r-S.secret.r));
+  if(d===0)return 3; if(d===1)return 2; if(d===2)return 1; return 0;
+}
+function doReveal(){
+  S.phase='reveal';
+  const delta=S.players.map(()=>0);
+  // guessers
+  S.placements.forEach(pl=>{delta[pl.p]+=pawnPoints(pl);});
+  // cue giver: 1 pt per guesser pawn in scoring zone, cap 3
+  let inzone=0;
+  S.placements.forEach(pl=>{if(pawnPoints(pl)>0)inzone++;});
+  delta[S.cueIdx]+=Math.min(3,inzone);
+  delta.forEach((d,i)=>S.score[i]+=d);
+  S.lastDelta=delta;
+  refreshBoard();renderStage();renderScores();
+}
+
+function nextTurn(){
+  S.cueIdx=(S.cueIdx+1)%S.players.length;
+  S.turn++;
+  if(S.turn>S.totalTurns){endGame();return;}
+  beginTurn();
+}
+
+/* ---------------- stage (phase panel) ---------------- */
+function renderStage(){
+  const p=S.phase;
+  if(p==='draw'){
+    stageEl.innerHTML=`
+      <div class="step">ขั้นที่ 1 · เลือกสีปริศนา</div>
+      <div class="big">ตาของ ${whoTag(S.cueIdx)} เป็นคนใบ้</div>
+      <div class="sub">จั่วการ์ด แล้วแอบเลือก 1 สีเป็นคำปริศนา (คนอื่นอย่ามอง)</div>
+      <button class="btn wide" id="draw">แตะเพื่อจั่วการ์ด</button>`;
+    document.getElementById('draw').onclick=drawCard;
+  }
+  else if(p==='clue1'){
+    stageEl.innerHTML=`
+      <div class="step">ขั้นที่ 2 · คำใบ้ที่ 1</div>
+      <div class="big">พูดคำใบ้ให้เพื่อน</div>
+      <div class="sub">${whoTag(S.cueIdx)} เลือกสีลับแล้ว — พูดคำใบ้ออกมา (พิมพ์บันทึกไว้ก็ได้)</div>
+      <input class="clue" id="c1" placeholder="เช่น: มะม่วงสุก" value="${esc(S.clue1)}">
+      <button class="btn wide" id="go1">ให้เพื่อนเริ่มทายรอบ 1</button>
+      <div class="bans" style="margin-top:8px">
+        <button class="btn ghost" id="peek1">👁 ดูสีลับอีกครั้ง</button>
+        <button class="btn ghost" id="redraw">🔄 สุ่มการ์ดใหม่</button>
+      </div>
+      <p class="note"><b>ห้าม:</b> บอกชื่อสีตรงๆ · ใช้ตัวเลข · ชี้สิ่งของในห้อง<br>คิดคำใบ้ไม่ออก? สุ่มการ์ดใหม่ได้ก่อนเริ่มทาย</p>`;
+    const inp=document.getElementById('c1'); inp.oninput=e=>S.clue1=e.target.value;
+    document.getElementById('go1').onclick=()=>{S.clue1=inp.value;startGuess(1);};
+    document.getElementById('peek1').onclick=peekSecret;
+    document.getElementById('redraw').onclick=()=>{S.clue1='';drawCard();};
+  }
+  else if(p==='guess'){
+    const cur=S.order[S.ptr];
+    stageEl.innerHTML=`
+      <div class="step">ขั้นที่ ${S.pawnRound===1?'3':'5'} · ทายรอบที่ ${S.pawnRound}</div>
+      ${clueBlock()}
+      <div class="big" style="margin-top:12px">แตะช่องสีบนกระดาน</div>
+      <div class="sub">ถึงตา ${whoTag(cur)} วางหมากตัวที่ ${S.pawnRound}
+        <span style="color:var(--dim)">(${S.ptr+1}/${S.order.length})</span></div>
+      <button class="btn ghost wide" id="peekg" style="margin-top:4px">👁 คนใบ้ดูสีลับ</button>
+      <p class="note">วางซ้ำช่องที่มีหมากอยู่แล้วไม่ได้</p>`;
+    document.getElementById('peekg').onclick=peekSecret;
+  }
+  else if(p==='clue2'){
+    stageEl.innerHTML=`
+      <div class="step">ขั้นที่ 4 · คำใบ้ที่ 2 (ทางเลือก)</div>
+      ${clueBlock()}
+      <div class="big" style="margin-top:12px">${whoTag(S.cueIdx)} จะให้คำใบ้ที่ 2 ไหม?</div>
+      <div class="sub">ถ้า <b>ให้คำใบ้</b> เพื่อนจะได้วางหมายทายอีกรอบ · ถ้า <b>ผ่าน</b> จะเฉลยและจบเทิร์นทันที (เพื่อนไม่ได้วางเพิ่ม)</div>
+      <input class="clue" id="c2" placeholder="พิมพ์คำใบ้ที่ 2 (ถ้าจะใบ้)" value="${esc(S.clue2)}">
+      <div class="bans">
+        <button class="btn" id="go2">ให้คำใบ้ที่ 2 → ทายรอบ 2</button>
+        <button class="btn ghost" id="skip2">ผ่าน → เฉลยเลย</button>
+      </div>
+      <button class="btn ghost wide" id="peek2" style="margin-top:8px">👁 ดูสีลับอีกครั้ง</button>
+      <p class="note">คำใบ้ที่ 2 ต้องไม่ใกล้เคียงคำแรก (เช่น "แอปเปิ้ล" → ห้าม "แอปเปิ้ลเน่า")</p>`;
+    const inp=document.getElementById('c2'); inp.oninput=e=>S.clue2=e.target.value;
+    document.getElementById('go2').onclick=()=>{S.clue2=inp.value;startGuess(2);};
+    document.getElementById('skip2').onclick=()=>{S.clue2='';doReveal();};
+    document.getElementById('peek2').onclick=peekSecret;
+  }
+  else if(p==='reveal'){
+    renderReveal();
+  }
+}
+function clueBlock(){
+  let h=`<div class="clueline"><b>ใบ้ 1</b><span>${S.clue1?esc(S.clue1):'(พูดปากเปล่า)'}</span></div>`;
+  if(S.pawnRound===2||S.phase==='clue2'){
+    if(S.clue2) h+=`<div class="clueline"><b>ใบ้ 2</b><span>${esc(S.clue2)}</span></div>`;
+  }
+  return h;
+}
+function renderReveal(){
+  const d=S.lastDelta;
+  let rows='';
+  S.order.forEach(i=>{
+    let pts=0; S.placements.filter(p=>p.p===i).forEach(p=>pts+=pawnPoints(p));
+    rows+=`<div class="rrow"><div class="l"><span class="pdot" style="background:${S.players[i].color}"></span>${S.players[i].name}</div><span class="g">+${pts}</span></div>`;
+  });
+  const cuePts=d[S.cueIdx];
+  rows+=`<div class="rrow"><div class="l"><span class="pdot" style="background:${S.players[S.cueIdx].color}"></span>${S.players[S.cueIdx].name} <span style="font-family:var(--mono);font-size:9px;color:#0b0b10;background:var(--warn);border-radius:4px;padding:1px 5px">ใบ้</span></div><span class="g">+${cuePts}</span></div>`;
+  const last=S.turn>=S.totalTurns;
+  stageEl.className='card result';
+  stageEl.innerHTML=`
+    <div class="step">เฉลย</div>
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px">
+      <div style="width:44px;height:44px;border-radius:10px;border:2px solid #fff3;background:${cellHSL(S.secret.c,S.secret.r)}"></div>
+      <div><div class="coord">${coordOf(S.secret.c,S.secret.r)}</div>
+      <div style="color:var(--mut);font-size:12px">สีที่ถูกต้อง</div></div>
+    </div>
+    ${rows}
+    <button class="btn wide" id="next" style="margin-top:14px">${last?'ดูผลสรุป 🏁':'เทิร์นต่อไป →'}</button>
+    <p class="note">★ ตรงเป๊ะ = 3 · ในกรอบ 3×3 = 2 · ในกรอบ 5×5 = 1 · คนใบ้ +1 ต่อหมากที่เข้ากรอบ (สูงสุด 3)</p>`;
+  document.getElementById('next').onclick=()=>{stageEl.className='card stage';nextTurn();};
+}
+
+/* ---------------- scoreboard ---------------- */
+function renderScores(){
+  const el=document.getElementById('scoreboard');
+  const idx=S.players.map((_,i)=>i).sort((a,b)=>S.score[b]-S.score[a]);
+  el.innerHTML=idx.map(i=>{
+    const cue=(S.phase!=='reveal'&&i===S.cueIdx)?' cue':'';
+    const dl=(S.phase==='reveal'&&S.lastDelta&&S.lastDelta[i])?`<span class="delta">+${S.lastDelta[i]}</span>`:'<span class="delta"></span>';
+    return `<div class="srow${cue}"><span class="pdot" style="background:${S.players[i].color}"></span>
+      <span class="nm">${S.players[i].name}</span>${dl}<span class="pts">${S.score[i]}</span></div>`;
+  }).join('');
+}
+
+/* ---------------- end ---------------- */
+function endGame(){
+  const idx=S.players.map((_,i)=>i).sort((a,b)=>S.score[b]-S.score[a]);
+  const top=S.score[idx[0]];
+  const winners=idx.filter(i=>S.score[i]===top);
+  const wtxt=winners.map(i=>S.players[i].name).join(' & ');
+  document.getElementById('turnpill').textContent='จบเกม';
+  boardEl.parentElement.style.opacity='.4';
+  stageEl.className='card';
+  stageEl.innerHTML=`<div class="winner">
+    <div class="crown">👑</div>
+    <div class="step" style="text-align:center">ผู้ชนะ</div>
+    <div class="wname">${wtxt}</div>
+    <div style="color:var(--mut)">${top} คะแนน</div>
+    <div class="podium">${idx.map((i,n)=>`
+      <div class="rrow"><div class="l"><b class="mono" style="color:var(--dim);width:18px">${n+1}</b>
+      <span class="pdot" style="background:${S.players[i].color}"></span>${S.players[i].name}</div>
+      <span class="g">${S.score[i]}</span></div>`).join('')}</div>
+    <button class="btn wide" style="margin-top:20px;max-width:340px" onclick="location.reload()">เล่นอีกครั้ง</button>
+  </div>`;
+  document.getElementById('scoreboard').closest('.scores').style.display='none';
+}
+
+function esc(s){return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+</script>
+</body>
+</html>
